@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Furão Gentil - App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================
+           VARIÁVEIS DE CORES E ESTILOS GLOBAIS
+           ========================================= */
+        :root {
+            --bg-app: #FDF8F5;
+            --bg-card: #F4EAE3;
+            --bg-white: #FFFFFF;
+            --primary: #6E4F3C;
+            --primary-light: #9A7B68;
+            --text-main: #4A3B32;
+            --text-muted: #7A6A61;
+            --border-color: #E6D5C9;
+            --shadow-sm: 0 4px 6px rgba(110, 79, 60, 0.05);
+            --shadow-md: 0 10px 20px rgba(110, 79, 60, 0.1);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #2A2A2A;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* =========================================
+           MOCKUP DO CELULAR
+           ========================================= */
+        .phone-frame {
+            width: 390px;
+            height: 844px;
+            background-color: var(--bg-app);
+            border-radius: 45px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 0 10px #1A1A1A, 0 20px 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .status-bar {
+            height: 44px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 25px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-main);
+            z-index: 10;
+            position: absolute;
+            top: 0;
+            width: 100%;
+        }
+
+        /* =========================================
+           GERENCIAMENTO DE TELAS
+           ========================================= */
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 20px 24px;
+            overflow-y: auto;
+            background-color: var(--bg-app);
+            padding-top: 50px;
+            padding-bottom: 90px;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .screen::-webkit-scrollbar { width: 0; }
+
+        /* =========================================
+           COMPONENTES REUTILIZÁVEIS
+           ========================================= */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            background: var(--bg-card);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .back-btn:active { background: var(--border-color); }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--bg-white);
+            border: none;
+            border-radius: 30px;
+            padding: 18px 24px;
+            font-size: 16px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+            background-color: #5A3E2E;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card:active { transform: scale(0.98); }
+
+        .card-icon {
+            font-size: 24px;
+            background: var(--bg-white);
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-text h3 {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .card-text p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            background-color: var(--bg-white);
+            color: var(--text-main);
+            outline: none;
+            font-weight: 600;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus { border-color: var(--primary); }
+
+        /* =========================================
+           BOTTOM NAVIGATION
+           ========================================= */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            background-color: var(--bg-white);
+            padding: 15px 10px 25px 10px;
+            border-top: 1px solid var(--border-color);
+            border-radius: 30px 30px 0 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-weight: 700;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active { color: var(--primary); }
+        .nav-item span { font-size: 22px; }
+
+        /* =========================================
+           DECORAÇÕES DO FURÃO (ELEMENTOS FOFO)
+           ========================================= */
+        .mascot-container {
+            position: relative;
+            display: inline-block;
+            margin: 0 auto;
+        }
+        
+        .mascot-emoji {
+            font-size: 110px;
+            line-height: 1;
+            display: block;
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 10px 10px rgba(110, 79, 60, 0.15));
+        }
+
+        .floating-deco {
+            position: absolute;
+            font-size: 20px;
+            animation: float 3s ease-in-out infinite;
+            z-index: 3;
+        }
+        
+        .deco-1 { top: -10px; left: -20px; animation-delay: 0s; }
+        .deco-2 { top: 20px; right: -25px; animation-delay: 0.5s; }
+        .deco-3 { bottom: 10px; left: -30px; animation-delay: 1s; }
+        .deco-4 { bottom: -15px; right: -15px; animation-delay: 1.5s; }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        /* =========================================
+           ESTILOS ESPECÍFICOS DAS TELAS
+           ========================================= */
+        
+        /* Tela 1: Início */
+        #screen-1 {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding-top: 0;
+        }
+        .mascot-logo {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        .sign-board {
+            background-color: var(--bg-white);
+            border: 4px solid var(--primary);
+            border-radius: 20px;
+            padding: 15px 30px;
+            position: relative;
+            z-index: 1;
+            box-shadow: var(--shadow-md);
+            margin-top: -20px;
+        }
+        .sign-board h1 {
+            font-size: 32px;
+            color: var(--primary);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 5px;
+        }
+        .sign-board p {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Tela 2: Dashboard */
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .dashboard-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .dashboard-title span { font-size: 32px; }
+
+        /* Tela 3: Denúncia */
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .step-number {
+            background-color: var(--primary);
+            color: var(--bg-white);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+        }
+        .upload-box {
+            border: 2px dashed var(--primary-light);
+            border-radius: var(--radius-lg);
+            padding: 30px 20px;
+            text-align: center;
+            background-color: rgba(255,255,255,0.5);
+            margin-bottom: 24px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .upload-box:active { background-color: var(--bg-white); }
+        .upload-box span { font-size: 32px; display: block; margin-bottom: 10px; }
+
+        /* Seletor de Redes Sociais */
+        .social-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .social-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-white);
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+        .social-btn.active {
+            border-color: var(--primary);
+            background-color: var(--bg-card);
+            color: var(--primary);
+        }
+        .social-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+        /* Pré-visualização Dinâmica */
+        .preview-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-top: 16px;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .preview-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .preview-avatar {
+            width: 44px;
+            height: 44px;
+            background: var(--bg-card);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .preview-info strong { display: block; font-size: 15px; color: var(--text-main); }
+        .preview-info span { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+        .preview-btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            opacity: 0.8;
+            cursor: default;
+        }
+        .preview-link {
+            font-size: 12px;
+            color: var(--text-muted);
+            background: var(--bg-app);
+            padding: 8px;
+            border-radius: 8px;
+            word-break: break-all;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        /* Tela 5: Anônimo */
+        .anonymous-icon {
+            font-size: 100px;
+            text-align: center;
+            margin: 30px 0 20px;
+            display: block;
+        }
+        .anonymous-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+        .anonymous-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 15px;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+        .anonymous-list li::before {
+            content: "✔️";
+            background: var(--bg-card);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        /* Tela 7: Como funciona */
+        .timeline { margin-top: 20px; }
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            position: relative;
+        }
+        .timeline-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: 19px;
+            top: 40px;
+            bottom: -24px;
+            width: 2px;
+            background-color: var(--border-color);
+        }
+        .timeline-icon {
+            background-color: var(--bg-card);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--primary);
+            z-index: 2;
+        }
+
+        /* Tela 8: Sucesso */
+        #screen-8 {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .success-icon {
+            font-size: 100px;
+            margin-bottom: 20px;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+
+        /* Tela 11: Ajuda (FAQ) */
+        .faq-item {
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--text-main);
+            transition: background 0.2s;
+        }
+        .faq-item:active { background: var(--bg-card); }
+
+        /* Tela 12: Final (Juntos por uma internet mais segura) */
+        #screen-12 {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg-app) 0%, #F0E6DF 100%);
+        }
+        #screen-12 h2 {
+            color: var(--primary);
+            font-size: 26px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+        #screen-12 h3 {
+            color: var(--text-main);
+            font-size: 22px;
+            margin-bottom: 30px;
+        }
+        #screen-12 p {
+            font-size: 15px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone-frame">
+    <div class="status-bar">
+        <span>9:41</span>
+        <span>📶 🔋</span>
+    </div>
+
+    <!-- ==================== TELA 1: INÍCIO ==================== -->
+    <div id="screen-1" class="screen active">
+        <div class="mascot-logo">
+            <div class="mascot-container">
+                <span class="mascot-emoji">🦦</span>
+                <span class="floating-deco deco-1">🤎</span>
+                <span class="floating-deco deco-2">🍃</span>
+                <span class="floating-deco deco-3">♥️</span>
+                <span class="floating-deco deco-4">🐾</span>
+            </div>
+            <div class="sign-board">
+                <h1>Furão<br>Gentil</h1>
+                <p>Juntos por um ambiente<br>online mais seguro e respeitoso.</p>
+            </div>
+        </div>
+        <button class="btn-primary" onclick="showScreen('screen-2')">Começar ➔</button>
+    </div>
+
+    <!-- ==================== TELA 2: DASHBOARD ==================== -->
+    <div id="screen-2" class="screen">
+        <div class="dashboard-header">
+            <div class="dashboard-title">
+                <span>🦦</span> Furão Gentil
+            </div>
+            <div style="font-size: 20px; cursor: pointer;">⚙️</div>
+        </div>
+        
+        <p style="font-size: 15px; color: var(--text-muted); margin-bottom: 24px; font-weight: 600; line-height: 1.5;">
+            Denuncie comportamentos inadequados nas redes sociais. Aqui, você ajuda a tornar a internet um lugar mais seguro para todos!
+        </p>
+
+        <div class="card" onclick="showScreen('screen-3')">
+            <div class="card-icon">📸</div>
+            <div class="card-text">
+                <h3>Fazer uma denúncia</h3>
+                <p>Envie o print e o link do usuário</p>
+            </div>
+            <div style="margin-left: auto; align-self: center; color: var(--primary);">➔</div>
+        </div>
+
+        <div class="card" onclick="showScreen('screen-7')">
+            <div class="card-icon">ℹ️</div>
+            <div class="card-text">
+                <h3>Como funciona?</h3>
+                <p>Entenda o processo de verificação e os critérios da nossa análise.</p>
+            </div>
+            <div style="margin-left: auto; align-self: center; color: var(--primary);">➔</div>
+        </div>
+
+        <div class="bottom-nav">
+            <button class="nav-item active" onclick="showScreen('screen-2')">
+                <span>🏠</span> Início
+            </button>
+            <button class="nav-item" onclick="showScreen('screen-10')">
+                <span>🛡️</span> Minhas denúncias
+            </button>
+            <button class="nav-item" onclick="showScreen('screen-11')">
+                <span>❓</span> Ajuda
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== TELA 3: DENÚNCIA (COM REDES SOCIAIS) ==================== -->
+    <div id="screen-3" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('screen-2')">←</button>
+            <div class="header-title">Fazer uma denúncia</div>
+        </div>
+
+        <div class="step-header">
+            <div class="step-number">1</div>
+            <h3 style="color: var(--text-main); font-size: 16px;">Envie o print</h3>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; font-weight: 600;">
+            Tire um print da publicação, comentário, foto ou perfil da pessoa que deseja denunciar.
+        </p>
+
+        <div class="upload-box" onclick="alert('Simulando seleção de imagem da galeria...')">
+            <span>📷</span>
+            <strong style="color: var(--text-main); font-size: 15px;">Adicionar print</strong>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px; font-weight: 600;">Toque para selecionar uma imagem.</p>
+        </div>
+
+        <div class="step-header" style="margin-top: 10px;">
+            <div class="step-number">2</div>
+            <h3 style="color: var(--text-main); font-size: 16px;">Envie o link do usuário</h3>
+        </div>
+        
+        <!-- Seletor de Rede Social -->
+        <div class="social-selector">
+            <button class="social-btn active" id="btn-instagram" onclick="selectPlatform('instagram')">
+                <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                Instagram
+            </button>
+            <button class="social-btn" id="btn-tiktok" onclick="selectPlatform('tiktok')">
+                <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+                TikTok
+            </button>
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="username-input" class="input-field" placeholder="@usuario" oninput="updatePreview()">
+        </div>
+
+        <!-- Pré-visualização Dinâmica -->
+        <div class="preview-card" id="preview-card">
+            <div class="preview-header">
+                <div class="preview-avatar">👤</div>
+                <div class="preview-info">
+                    <strong id="preview-username">usuario123</strong>
+                    <span id="preview-platform">Instagram</span>
+                </div>
+            </div>
+            <button class="preview-btn">Seguir</button>
+            <div class="preview-link" id="preview-link">
+                🔗 instagram.com/usuario123
+            </div>
+        </div>
+
+        <button class="btn-primary" style="margin-top: 20px;" onclick="showScreen('screen-5')">Próximo ➔</button>
+    </div>
+
+    <!-- ==================== TELA 5: ANÔNIMO ==================== -->
+    <div id="screen-5" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('screen-3')">←</button>
+            <div class="header-title">Totalmente anônimo</div>
+        </div>
+
+        <span class="anonymous-icon">🕵️‍♂️</span>
+        <h2 style="color: var(--primary); font-size: 22px; text-align: center; margin-bottom: 10px;">Sua identidade é 100% protegida!</h2>
+
+        <ul class="anonymous-list">
+            <li>Não coletamos seus dados pessoais.</li>
+            <li>Não vemos seu nome, e-mail ou IP.</li>
+            <li>Suas denúncias são anônimas.</li>
+            <li>Você pode denunciar sem se preocupar com sua identidade.</li>
+        </ul>
+
+        <div class="card" style="margin-top: 20px; cursor: default; background: var(--bg-card);">
+            <div class="card-icon" style="background: var(--bg-white);">🔒</div>
+            <div class="card-text">
+                <p>Aqui, o seu anonimato é garantido. Você pode denunciar com tranquilidade.</p>
+            </div>
+        </div>
+        
+        <button class="btn-primary" style="margin-top: auto;" onclick="showScreen('screen-6')">Entendi ➔</button>
+    </div>
+
+    <!-- ==================== TELA 6: REGRAS ==================== -->
+    <div id="screen-6" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('screen-5')">←</button>
+            <div class="header-title">Regras importantes</div>
+        </div>
+
+        <div class="card" style="cursor: default; background: var(--bg-card);">
+            <div class="card-icon">📱</div>
+            <div class="card-text">
+                <h3>Uma denúncia por dispositivo</h3>
+                <p>Para evitar abusos e denúncias falsas, só é permitido fazer 1 denúncia por usuário, por dispositivo.</p>
+            </div>
+        </div>
+
+        <div class="card" style="cursor: default; background: var(--bg-card);">
+            <div class="card-icon">👥</div>
+            <div class="card-text">
+                <h3>Para derrubar uma conta</h3>
+                <p>Uma conta só pode ser derrubada se receber 3 denúncias de usuários diferentes.</p>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: center; margin-top: 20px;">
+            <div style="background: var(--bg-white); padding: 12px; border-radius: var(--radius-sm); text-align: center; flex: 1; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+                <strong style="display: block; color: var(--primary); font-size: 14px;">1ª Denúncia</strong>
+                <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">(Usuário A)</span>
+            </div>
+            <div style="background: var(--bg-white); padding: 12px; border-radius: var(--radius-sm); text-align: center; flex: 1; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+                <strong style="display: block; color: var(--primary); font-size: 14px;">2ª Denúncia</strong>
+                <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">(Usuário B)</span>
+            </div>
+            <div style="background: var(--bg-white); padding: 12px; border-radius: var(--radius-sm); text-align: center; flex: 1; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+                <strong style="display: block; color: var(--primary); font-size: 14px;">3ª Denúncia</strong>
+                <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">(Usuário C)</span>
+            </div>
+        </div>
+        
+        <button class="btn-primary" style="margin-top: auto;" onclick="showScreen('screen-8')">Enviar Denúncia</button>
+    </div>
+
+    <!-- ==================== TELA 7: COMO FUNCIONA ==================== -->
+    <div id="screen-7" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('screen-2')">←</button>
+            <div class="header-title">Como funciona?</div>
+        </div>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-icon">1</div>
+                <div class="card-text">
+                    <h3>Você envia o print e o link</h3>
+                    <p>Sua denúncia chega de forma anônima e é registrada no sistema.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-icon">2</div>
+                <div class="card-text">
+                    <h3>Verificamos se é real</h3>
+                    <p>Nossa equipe analisa o conteúdo para verificar se não é um print manipulado ou uma informação falsa.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-icon">3</div>
+                <div class="card-text">
+                    <h3>Conferimos na rede social</h3>
+                    <p>Entramos no perfil e verificamos se o usuário realmente fez o comentário, postou a foto ou cometeu a infração.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-icon">4</div>
+                <div class="card-text">
+                    <h3>Tomamos as medidas</h3>
+                    <p>Se confirmado, o usuário é denunciado e pode ter sua conta suspensa ou derrubada (se receber 3 denúncias).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TELA 8: SUCESSO ==================== -->
+    <div id="screen-8" class="screen">
+        <div class="mascot-container" style="margin-bottom: 20px;">
+            <span class="mascot-emoji" style="font-size: 90px;">🦦</span>
+            <span class="floating-deco deco-1">🎉</span>
+            <span class="floating-deco deco-2">🤎</span>
+            <span class="floating-deco deco-3">✨</span>
+        </div>
+        <span class="success-icon" style="position: absolute; top: 30%; right: 20%; font-size: 40px;">✅</span>
+        
+        <h2 style="color: var(--text-main); font-size: 24px; margin-bottom: 10px;">Denúncia enviada com sucesso!</h2>
+        <p style="color: var(--text-muted); margin-bottom: 30px; font-weight: 600;">Agora é com a nossa equipe.</p>
+
+        <div class="card" style="text-align: left; cursor: default; width: 100%; background: var(--bg-card);">
+            <div class="card-icon" style="background: var(--bg-white);">ℹ️</div>
+            <div class="card-text">
+                <h3>Lembre-se:</h3>
+                <p>• Só pode haver 1 denúncia por dispositivo contra o mesmo usuário.</p>
+                <p>• Para derrubar uma conta, são necessárias 3 denúncias de usuários diferentes.</p>
+                <p>• Você será notificado apenas se a conta for derrubada (ou se houver atualização importante no processo).</p>
+            </div>
+        </div>
+
+        <!-- Botão atualizado para ir para a tela final -->
+        <button class="btn-primary" style="margin-top: auto;" onclick="showScreen('screen-12')">Avançar ➔</button>
+    </div>
+
+    <!-- ==================== TELA 10: MINHAS DENÚNCIAS ==================== -->
+    <div id="screen-10" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('screen-2')">←</button>
+            <div class="header-title">Minhas denúncias</div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <div class="mascot-container" style="opacity: 0.5; margin-bottom: 20px;">
+                <span class="mascot-emoji" style="font-size: 100px;">🦦</span>
+                <span class="floating-deco deco-1" style="font-size: 15px;">💤</span>
+            </div>
+            <h3 style="color: var(--text-main); margin-bottom: 10px; font-size: 18px;">Você ainda não fez denúncias neste dispositivo.</h3>
+            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 30px; font-weight: 600; padding: 0 20px;">
+                Lembre-se: só é permitido 1 denúncia por dispositivo, e para derrubar uma conta são necessárias 3 denúncias de usuários diferentes.
+            </p>
+            <button class="btn-primary" onclick="showScreen('screen-3')">Fazer uma denúncia</button>
+        </div>
+        
+        <div class="bottom-nav">
+            <button class="nav-item" onclick="showScreen('screen-2')">
+                <span>🏠</span> Início
+            </button>
+            <button class="nav-item active" onclick="showScreen('screen-10')">
+                <span>🛡️</span> Minhas denúncias
+            </button>
+            <button class="nav-item" onclick="showScreen('screen-11')">
+                <span>❓</span> Ajuda
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== TELA 11: AJUDA ==================== -->
+    <div id="screen-11" class="screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('screen-2')">←</button>
+            <div class="header-title">Ajuda</div>
+        </div>
+
+        <div class="faq-item" onclick="alert('Abrir detalhes...')">
+            <span>Como fazer uma denúncia?</span>
+            <span>∨</span>
+        </div>
+        <div class="faq-item" onclick="alert('Abrir detalhes...')">
+            <span>Posso denunciar mais de uma vez?</span>
+            <span>∨</span>
+        </div>
+        <div class="faq-item" onclick="alert('Abrir detalhes...')">
+            <span>O que é considerado uma infração?</span>
+            <span>∨</span>
+        </div>
+        <div class="faq-item" onclick="alert('Abrir detalhes...')">
+            <span>Como funciona a verificação?</span>
+            <span>∨</span>
+        </div>
+        <div class="faq-item" onclick="alert('Abrir detalhes...')">
+            <span>Quanto tempo leva para analisar?</span>
+            <span>∨</span>
+        </div>
+        <div class="faq-item" onclick="alert('Abrir detalhes...')">
+            <span>Minha denúncia foi rejeitada. O que fazer?</span>
+            <span>∨</span>
+        </div>
+
+        <div class="bottom-nav">
+            <button class="nav-item" onclick="showScreen('screen-2')">
+                <span>🏠</span> Início
+            </button>
+            <button class="nav-item" onclick="showScreen('screen-10')">
+                <span>🛡️</span> Minhas denúncias
+            </button>
+            <button class="nav-item active" onclick="showScreen('screen-11')">
+                <span>❓</span> Ajuda
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== TELA 12: FINAL (JUNTOS POR UMA INTERNET MAIS SEGURA) ==================== -->
+    <div id="screen-12" class="screen">
+        <div class="mascot-container" style="margin-bottom: 20px;">
+            <span class="mascot-emoji" style="font-size: 120px;">🦦</span>
+            <!-- Coração sendo "abraçado" pelo mascote -->
+            <span class="floating-deco" style="font-size: 40px; bottom: -10px; left: 50%; transform: translateX(-50%);">🤎</span>
+            <span class="floating-deco deco-1">🍃</span>
+            <span class="floating-deco deco-2">🍃</span>
+            <span class="floating-deco deco-3">♥️</span>
+            <span class="floating-deco deco-4">🐾</span>
+        </div>
+        
+        <h2>Juntos por uma internet mais segura e respeitosa!</h2>
+        <h3>Furão Gentil</h3>
+        
+        <p>Denuncie. Ajude. Faça a diferença.</p>
+        <div style="font-size: 24px; margin-bottom: 30px;">🐾</div>
+
+        <button class="btn-primary" onclick="showScreen('screen-1')">Voltar para o início</button>
+    </div>
+
+</div>
+
+<script>
+    // =========================================
+    // LÓGICA DE NAVEGAÇÃO ENTRE TELAS
+    // =========================================
+    function showScreen(screenId) {
+        // Esconde todas as telas
+        const screens = document.querySelectorAll('.screen');
+        screens.forEach(screen => screen.classList.remove('active'));
+
+        // Mostra a tela desejada
+        const targetScreen = document.getElementById(screenId);
+        if (targetScreen) {
+            targetScreen.classList.add('active');
+            targetScreen.scrollTop = 0; // Rola para o topo ao trocar de tela
+        }
+
+        // Atualiza a navegação inferior (apenas para telas que possuem)
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.classList.remove('active');
+            const text = item.innerText;
+            if (screenId === 'screen-2' && text.includes('Início')) item.classList.add('active');
+            if (screenId === 'screen-10' && text.includes('Minhas')) item.classList.add('active');
+            if (screenId === 'screen-11' && text.includes('Ajuda')) item.classList.add('active');
+        });
+    }
+
+    // =========================================
+    // LÓGICA DE SELEÇÃO DE REDE SOCIAL E PREVIEW
+    // =========================================
+    let currentPlatform = 'instagram';
+    let currentUsername = 'usuario123';
+
+    function selectPlatform(platform) {
+        currentPlatform = platform;
+        
+        // Atualiza classes dos botões (ativo/inativo)
+        document.getElementById('btn-instagram').classList.remove('active');
+        document.getElementById('btn-tiktok').classList.remove('active');
+        
+        if (platform === 'instagram') {
+            document.getElementById('btn-instagram').classList.add('active');
+            document.getElementById('preview-platform').innerText = 'Instagram';
+        } else {
+            document.getElementById('btn-tiktok').classList.add('active');
+            document.getElementById('preview-platform').innerText = 'TikTok';
+        }
+        
+        updatePreview();
+    }
+
+    function updatePreview() {
+        const inputVal = document.getElementById('username-input').value.trim();
+        // Remove o @ se o usuário digitar
+        const cleanUsername = inputVal.startsWith('@') ? inputVal.substring(1) : inputVal;
+        
+        // Se estiver vazio, usa um padrão
+        currentUsername = cleanUsername || 'usuario123';
+        
+        // Atualiza o nome no cartão de preview
+        document.getElementById('preview-username').innerText = currentUsername;
+        
+        // Atualiza o link gerado com base na rede social selecionada
+        let link = '';
+        if (currentPlatform === 'instagram') {
+            link = `🔗 instagram.com/${currentUsername}`;
+        } else {
+            link = `🔗 tiktok.com/@${currentUsername}`;
+        }
+        
+        document.getElementById('preview-link').innerText = link;
+    }
+
+    // Inicializa a primeira tela ao carregar
+    document.addEventListener('DOMContentLoaded', () => {
+        showScreen('screen-1');
+    });
+</script>
+
+</body>
+</html>
